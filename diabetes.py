@@ -1,4 +1,4 @@
-# diabetes_rf_streamlit.py
+# diabetes_rf_app.py
 import streamlit as st
 from sklearn.datasets import load_diabetes
 from sklearn.ensemble import RandomForestRegressor
@@ -17,15 +17,36 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 
-# Streamlit UI
-st.title("Diabetes Progression Predictor")
-st.write("Input the following parameters to predict the disease progression (quantitative measure)")
+# Friendly display names for features
+feature_labels = {
+    'age': 'Age (standardized)',
+    'sex': 'Sex (1 = male, 0 = female)',
+    'bmi': 'Body Mass Index',
+    'bp': 'Average Blood Pressure',
+    's1': 'Total Serum Cholesterol',
+    's2': 'Low-Density Lipoproteins (LDL)',
+    's3': 'High-Density Lipoproteins (HDL)',
+    's4': 'Total Cholesterol / HDL Ratio',
+    's5': 'Blood Sugar Level',
+    's6': 'Insulin Level'
+}
 
-# Create input widgets for all features
+# Streamlit UI
+st.title("🩺 Diabetes Progression Predictor")
+st.write("Provide the following inputs to predict disease progression score.")
+
+# Collect user inputs
 user_input = {}
+
 for feature in diabetes.feature_names:
-    val = st.number_input(f"Enter {feature}", value=float(X[feature].mean()), step=0.01)
-    user_input[feature] = val
+    label = feature_labels.get(feature, feature)
+    
+    if feature == 'sex':
+        sex_input = st.selectbox(label, options=['Male', 'Female'])
+        user_input[feature] = 1.0 if sex_input == 'Male' else 0.0
+    else:
+        default_val = float(X[feature].mean())
+        user_input[feature] = st.number_input(label, value=default_val, step=0.01)
 
 # Predict button
 if st.button("Predict"):
